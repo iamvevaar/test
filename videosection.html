@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+    
+    
+<style>  
+    /* this is video sections styles */
+            .content-column {
+                flex: 1;
+                position: relative;
+                padding-right:44px
+            }
+    
+            .image-column {
+                flex: 1;
+                position: relative;
+            }
+            .frame {            
+                width: 100%;
+                object-fit: contain;           
+            }
+            .image-container {
+                    padding-left: 4px;
+                padding-right: 4px;
+                position: absolute;
+                top: 22px;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+    
+         
+            .image-container video {
+                width: 100%;
+                height: 100%;
+                border-radius: 8px;
+    
+                object-fit: cover;
+                display: none;
+            }
+    
+            .image-container video.active {
+                display: block;
+            }
+            
+            .journey-section {         
+                position: relative;
+                opacity: 0.4;
+                transition: opacity 0.3s ease;
+                cursor:pointer;
+            }
+    
+            .journey-section.active {
+                opacity: 1;
+            }
+           .journey-section.active .journey-progress-track,
+    .mobile-slide.active .journey-progress-track {
+      display: block; /* Show only for active */
+    }
+            
+            .journey-progress-fill {         
+                background: linear-gradient(314deg, #FFA75A 0%, #F3FD87 100%);        
+                border-radius: 2px;
+                transition: height 0.3s linear;
+            }
+    
+            .journey-section:not(.active) .journey-progress-fill {
+                height: 0 !important;
+            }
+       /* Desktop dots */
+        .dots-container {
+          display: flex;
+        }
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #e0e0e0;
+          transition: background-color 0.3s ease;
+          margin-right: 8px;
+        }
+        .dot.active {
+          background: #184A44;
+        }
+    
+        /* ------------------------------------
+           MOBILE STYLES
+           ------------------------------------ */
+        @media (max-width: 900px) {
+          /* Hide desktop container */
+          .container {
+            display: none !important;
+          }	
+          .mobile-container {
+            display: block;
+            position: relative;
+          }
+          .mobile-slides-wrapper {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            gap: 16px;
+            margin: 0 auto;
+            max-width: 100%;
+            padding: 20px 0;
+            /* Smooth scrolling for manual swipes */
+            scroll-behavior: smooth;
+          }
+          .mobile-slides-wrapper::-webkit-scrollbar {
+            display: none; /* optional: hide scrollbar */
+          }
+    
+          .mobile-slide {
+            flex: 0 0 80%; /* partial slides on the sides */
+            scroll-snap-align: center;
+            position: relative;
+            background: #fff;
+            border-radius: 8px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+          }
+          .mobile-slide.inactive {
+            transform: scale(0.9);
+            opacity: 0.85;
+          }
+          .mobile-slide.active {
+            transform: scale(1);
+            opacity: 1;
+          }
+    
+          .slide-content {
+            width: 100%;
+          }
+          .slide-video {
+            width: 100%;
+            height: 200px; /* or your preferred height */
+            object-fit: cover;
+            display: block;
+          }
+    
+          /* 
+             .slide-text now will hold the progress bar at the left side 
+             so we position: relative; so the bar can be absolutely placed.
+          */
+          .slide-text {
+            position: relative;
+            padding-left: 20px; /* so text doesn't overlap bar */
+          }
+    
+          /* We now place .journey-progress-track inside .slide-text at left=0 */
+          .slide-text .journey-progress-track {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+          }
+          .slide-text .journey-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            background-color: #2e7d32; 
+            border-radius: 2px;
+            height: 0; /* will fill up in JS */
+            transition: height 0.1s linear;
+          }
+           .slide-text > h2 {
+            color: #184A44;
+            font-family: Outfit;
+            font-size: 24px;
+            font-style: normal;
+            font-weight: 400;
+          }
+    
+          .slide-text > p {
+            color: #585A5A;
+            font-family: Outfit;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+          }
+         .mobile-frame-wrapper {
+        position: relative;
+        width: 100%;
+        height: 220px; /* gives the container visible area */
+        overflow: hidden;
+      }
+    
+      /* If frame is on top: */
+      .mobile-frame-wrapper .frame {
+        position: absolute;
+        top: 0;
+        left: 0;
+        object-fit: contain; 
+        z-index: 2;
+        border-radius: 12px;
+      }
+    
+      /* Video behind the frame: */
+      .mobile-frame-wrapper .slide-video {
+        position: absolute;
+        left: 0;
+        border-radius: 16px;
+        padding-left: 4px;
+        padding-right: 4px;
+        margin-top:12px;
+        object-fit: cover; 
+        z-index: 10;
+        height: auto;
+      }
+    
+    
+          /* Mobile dots container */
+          .mobile-dots-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+            margin-bottom:32px;
+          }
+          .mobile-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 4px;
+            transition: background-color 0.3s ease, transform 0.3s;
+          }
+          .mobile-dot.active {
+            background-color: #184A44;
+            transform: scale(1.2);
+          }
+        }
+    
+         /* Hide mobile container on desktop */ 
+       @media (min-width: 901px) {
+          .mobile-container {
+            display: none !important;
+          }
+        }   
+        
+         @media  (max-width: 901px) {
+    .w-layout-blockcontainer.section-four-content-container.max-container.w-container{
+            display: none !important;
+    }
+        .section-four-content-container.max-container {
+            display: none !important;
+        }}
+        
+        
+    
+    
+      </style>
+<body>
+    
+</script>
+
+
+<script>
+/* this is the video gif section script*/
+    // Data source for all content
+    const journeyData = [
+        {
+            id: 0,
+            title: "Explore Your Dream Neighborhood.",
+            description: "Take a 3D interactive map tour of New Amsterdam's parks, schools, cafes, and shops - all near your future home.",
+            videoUrl: "https://cdn.prod.website-files.com/6756bb3e949af403483e7f74%2F6788b9d828169f3174352bac_updated%20height-transcode.mp4",
+            imageAlt: "Neighborhood Map",
+            duration: 800000  // 8 seconds
+        },
+        {
+            id: 1,
+            title: "Pick the Home That Speaks to You.",
+            description: "Answer a few questions to find homes matching your lifestyle and budget, from cosy cottages to spacious townhomes.",
+            videoUrl: "https://cdn.prod.website-files.com/6756bb3e949af403483e7f74%2F6784dee04d54863ef234204f_video%201_1-transcode.mp4",
+            imageAlt: "Home Selection",
+            duration: 400000  // 5 seconds
+        },
+        {
+            id: 2,
+            title: "Make It Yours.",
+            description: "Customize everything about your home. From location, style, to interiors create a home that reflects your unique taste.",
+            videoUrl: "https://cdn.prod.website-files.com/6756bb3e949af403483e7f74%2F678795d9c8191f63d4388b39_3%20-%20Customization-transcode.mp4",
+            imageAlt: "Customization",
+            duration: 300000  // 4 seconds
+        },
+        {
+            id: 3,
+            title: "Pick Your Move-in Date.",
+            description: "Choose your move-in date, even your future neighbours. Get it ready in as little as 10 days. A small deposit is all it takes to get started.",
+            videoUrl: "https://cdn.prod.website-files.com/6756bb3e949af403483e7f74%2F678795ff4548fc05e59c24db_4%20-%20place%20order-transcode.mp4",
+            imageAlt: "Move-in Planning",
+            duration: 600000  // 6 seconds
+        }
+    ];
+    
+     function enableClickForJourneySections() {
+  const sections = document.querySelectorAll('.journey-section');
+
+  sections.forEach((section, index) => {
+    section.addEventListener('click', () => {
+      // Stop the current animation frame
+      if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationStartTime = null; // Reset animation timer
+      }
+
+      // Update the active step based on the clicked section
+      activeJourneyStep = index;
+      updateActiveStatesDesktop();
+
+      // Restart the animation frame
+      animationFrame = requestAnimationFrame(animateDesktop);
+    });
+  });
+}
+
+    /* -----------------------------------------------------
+   2) DESKTOP LOGIC (UNCHANGED)
+   ----------------------------------------------------- */
+let activeJourneyStep = 0;
+let animationStartTime = null;
+let animationFrame = null;
+
+function getCurrentDuration() {
+  return journeyData[activeJourneyStep].duration;
+}
+
+function updateActiveStatesDesktop() {
+  const sections = document.querySelectorAll('.journey-section');
+  const videos = document.querySelectorAll('.image-container video');
+  const dots = document.querySelectorAll('.dot');
+
+  sections.forEach((section, index) => {
+    section.classList.toggle('active', index === activeJourneyStep);
+  });
+  videos.forEach((video, index) => {
+    video.classList.toggle('active', index === activeJourneyStep);
+    if (index === activeJourneyStep) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  });
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === activeJourneyStep);
+  });
+}
+
+function animateDesktop(timestamp) {
+  if (!animationStartTime) animationStartTime = timestamp;
+  const elapsed = timestamp - animationStartTime;
+  const currentDuration = getCurrentDuration();
+  const progress = Math.min((elapsed / currentDuration) * 100, 100);
+
+  const currentSection = document.querySelector(`.journey-section[data-index="${activeJourneyStep}"]`);
+  const progressBar = currentSection.querySelector('.journey-progress-fill');
+  progressBar.style.height = `${progress}%`;
+
+  if (elapsed >= currentDuration) {
+    animationStartTime = null;
+    activeJourneyStep = (activeJourneyStep + 1) % journeyData.length;
+    updateActiveStatesDesktop();
+  }
+
+  animationFrame = requestAnimationFrame(animateDesktop);
+}
+
+function initializeDesktop() {
+  const contentColumn = document.getElementById('content-column');
+  const imageContainer = document.getElementById('image-container');
+  const dotsContainer = document.querySelector('.dots-container');
+  const sectionTemplate = contentColumn.querySelector('.journey-section');
+
+  // Fill the template with first data
+  sectionTemplate.querySelector('h3').textContent = journeyData[0].title;
+  sectionTemplate.querySelector('p').textContent = journeyData[0].description;
+
+  // Create the dots (desktop)
+ // journeyData.forEach((_, index) => {
+   // const dot = document.createElement('div');
+    // dot.className = 'dot';
+    // dot.dataset.index = index;
+    // dotsContainer.appendChild(dot);
+  // });
+
+  // Create additional journey-sections for each data item
+  journeyData.forEach((data, index) => {
+    if (index === 0) {
+      // assigned above
+    } else {
+      const newSection = sectionTemplate.cloneNode(true);
+      newSection.dataset.index = index;
+      newSection.querySelector('h3').textContent = data.title;
+      newSection.querySelector('p').textContent = data.description;
+      contentColumn.appendChild(newSection);
+    }
+    // Add videos
+    const video = document.createElement('video');
+    video.src = data.videoUrl;
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.dataset.index = index;
+    imageContainer.appendChild(video);
+  });
+  enableClickForJourneySections();
+}
+
+/* -----------------------------------------------------
+   3) MOBILE INFINITE LOOP + TIMED PROGRESS
+   ----------------------------------------------------- */
+
+let mobileAnimationFrame = null;
+let mobileStartTime = null;
+let activeMobileIndex = 0; // which *real* slide index is currently active
+let mobileJustScrolled = false; // reset timer if user swipes
+function initializeMobileInfiniteLoop() {
+  const mobileWrapper = document.getElementById('mobile-slides-wrapper');
+  const mobileDotsContainer = document.getElementById('mobile-dots-container');
+
+  // 1) CLONE
+  const lastSlideClone = { ...journeyData[journeyData.length - 1], clone: true };
+  const firstSlideClone = { ...journeyData[0], clone: true };
+  const loopedData = [lastSlideClone, ...journeyData, firstSlideClone];
+
+  // 2) BUILD SLIDES
+  loopedData.forEach((dataObj, i) => {
+    const slide = document.createElement('div');
+    slide.classList.add('mobile-slide');
+    slide.dataset.index = String(i);
+
+    // Slide content
+    const slideContent = document.createElement('div');
+    slideContent.classList.add('slide-content');
+
+    // Create ONE wrapper for both frame & video
+    const frameVideoWrapper = document.createElement('div');
+    frameVideoWrapper.classList.add('mobile-frame-wrapper');
+
+    // The frame <img>
+    const frameImg = document.createElement('img');
+    frameImg.src = "https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6784cec9514f5847cc5907bf_Browser%201%20(1).svg";
+    frameImg.alt = "Frame";
+    frameImg.classList.add('frame'); // optional
+
+
+
+    // The video
+    const video = document.createElement('video');
+    video.classList.add('slide-video');
+    video.src = dataObj.videoUrl;
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+
+    // Append them in the same container
+    frameVideoWrapper.appendChild(frameImg);
+    frameVideoWrapper.appendChild(video);
+
+    // Add to slideContent
+    slideContent.appendChild(frameVideoWrapper);
+
+
+    // The text container
+    const textDiv = document.createElement('div');
+    textDiv.classList.add('slide-text');
+
+
+    // Insert the progress bar INSIDE .slide-text, on the left
+    const track = document.createElement('div');
+    track.className = 'journey-progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'journey-progress-fill';
+    track.appendChild(fill);
+    textDiv.appendChild(track);
+
+    // Heading + paragraph
+    const h2 = document.createElement('h2');
+    h2.textContent = dataObj.title;
+    const p = document.createElement('p');
+    p.textContent = dataObj.description;
+
+    textDiv.appendChild(h2);
+    textDiv.appendChild(p);
+
+    // Assemble the structure
+    // slideContent.appendChild(video);
+    slideContent.appendChild(textDiv);
+    slide.appendChild(slideContent);
+    mobileWrapper.appendChild(slide);
+  });
+
+  // 3) CREATE DOTS (for real slides)
+  journeyData.forEach((_, realIndex) => {
+    const dot = document.createElement('div');
+    dot.classList.add('mobile-dot');
+    dot.dataset.realIndex = realIndex;
+    mobileDotsContainer.appendChild(dot);
+  });
+
+  // SCROLL TO FIRST REAL SLIDE (index=1 in loopedData)
+ setTimeout(() => {
+const firstRealSlide = mobileWrapper.children[1];
+if (firstRealSlide) {
+// Replace scrollIntoView with manual scroll within the wrapper
+const scrollAmount = firstRealSlide.offsetLeft - mobileWrapper.offsetLeft;
+mobileWrapper.scrollLeft = scrollAmount;
+}
+updateActiveMobileSlidesLoop();
+mobileAnimationFrame = requestAnimationFrame(animateMobile);
+}, 50);
+
+  // SCROLL LISTENER
+  let scrollDebounce;
+  mobileWrapper.addEventListener('scroll', () => {
+    if (scrollDebounce) clearTimeout(scrollDebounce);
+    scrollDebounce = setTimeout(() => {
+      handleInfiniteLoopScroll(mobileWrapper, loopedData);
+      updateActiveMobileSlidesLoop();
+      // If user manually swipes, reset the timer for the new active slide
+      mobileJustScrolled = true;
+      mobileStartTime = null;
+    }, 50);
+  });
+}
+
+function handleInfiniteLoopScroll(wrapper, loopedData) {
+  const slides = wrapper.querySelectorAll('.mobile-slide');
+  const totalSlides = loopedData.length;
+  const firstCloneEl = slides[0];
+  const lastCloneEl = slides[totalSlides - 1];
+  const firstRealEl = slides[1];
+  const lastRealEl = slides[totalSlides - 2];
+
+  if (!firstCloneEl || !lastCloneEl || !firstRealEl || !lastRealEl) return;
+
+  const scrollLeft = wrapper.scrollLeft;
+  const containerWidth = wrapper.clientWidth;
+  const scrollWidth = wrapper.scrollWidth;
+
+  // Threshold logic
+  const leftThreshold = containerWidth * 0.1;
+  const rightThreshold = scrollWidth - (containerWidth * 1.1);
+
+  // Jump to last real
+  if (scrollLeft <= leftThreshold) {
+    wrapper.style.scrollBehavior = 'auto';
+    const scrollToLast = scrollWidth - (containerWidth * 2);
+    wrapper.scrollLeft = scrollToLast;
+    requestAnimationFrame(() => {
+      wrapper.style.scrollBehavior = 'smooth';
+    });
+  }
+  // Jump to first real
+  else if (scrollLeft >= rightThreshold) {
+    wrapper.style.scrollBehavior = 'auto';
+    wrapper.scrollLeft = containerWidth;
+    requestAnimationFrame(() => {
+      wrapper.style.scrollBehavior = 'smooth';
+    });
+  }
+}
+
+// Finds the center slide, marks it active, updates dots, etc.
+function updateActiveMobileSlidesLoop() {
+  const wrapper = document.getElementById('mobile-slides-wrapper');
+  const slides = wrapper.querySelectorAll('.mobile-slide');
+  const dots = document.getElementById('mobile-dots-container').querySelectorAll('.mobile-dot');
+
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const centerX = wrapperRect.x + (wrapperRect.width / 2);
+
+  let closestSlide = null;
+  let closestDist = Infinity;
+  let realIndexForClosest = 0;
+
+  slides.forEach((slide) => {
+    const rect = slide.getBoundingClientRect();
+    const slideCenterX = rect.x + (rect.width / 2);
+    const dist = Math.abs(slideCenterX - centerX);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestSlide = slide;
+    }
+  });
+
+  if (!closestSlide) return;
+
+  // Determine realIndex
+  const idx = parseInt(closestSlide.dataset.index, 10);
+  if (idx >= 1 && idx <= journeyData.length) {
+    realIndexForClosest = idx - 1; 
+  } else if (idx === 0) {
+    realIndexForClosest = journeyData.length - 1; 
+  } else if (idx === journeyData.length + 1) {
+    realIndexForClosest = 0;
+  }
+
+  // Mark active/inactive + play/pause
+  slides.forEach((sl) => {
+    const vid = sl.querySelector('video');
+    if (sl === closestSlide) {
+      sl.classList.add('active');
+      sl.classList.remove('inactive');
+      vid.play();
+    } else {
+      sl.classList.remove('active');
+      sl.classList.add('inactive');
+      vid.pause();
+    }
+  });
+
+  // Update dots
+  dots.forEach(dot => dot.classList.remove('active'));
+  if (dots[realIndexForClosest]) {
+    dots[realIndexForClosest].classList.add('active');
+  }
+
+  // Set global "activeMobileIndex" so we know which real slide is current
+  activeMobileIndex = realIndexForClosest;
+}
+
+// Similar to desktop: track elapsed time, fill bar, auto-advance
+function animateMobile(timestamp) {
+  if (!mobileStartTime || mobileJustScrolled) {
+    mobileStartTime = timestamp;
+    mobileJustScrolled = false;
+  }
+
+  const duration = journeyData[activeMobileIndex].duration;
+  const elapsed = timestamp - mobileStartTime;
+  const progress = Math.min((elapsed / duration) * 100, 100);
+
+  // Find the *active* slide in the DOM
+  const wrapper = document.getElementById('mobile-slides-wrapper');
+  const slides = wrapper.querySelectorAll('.mobile-slide');
+  let activeSlideEl = null;
+  slides.forEach((sl) => {
+    if (sl.classList.contains('active')) {
+      activeSlideEl = sl;
+    }
+  });
+
+  // Update vertical progress bar
+  if (activeSlideEl) {
+    const fill = activeSlideEl.querySelector('.journey-progress-fill');
+    if (fill) {
+      fill.style.height = `${progress}%`;
+    }
+  }
+
+  if (elapsed >= duration) {
+    // Time's up => auto-advance to the next real slide
+    scrollToNextMobileSlide();
+    mobileStartTime = null; // reset for next slide
+  }
+
+  mobileAnimationFrame = requestAnimationFrame(animateMobile);
+}
+
+function scrollToNextMobileSlide() {
+const wrapper = document.getElementById('mobile-slides-wrapper');
+const slides = wrapper.querySelectorAll('.mobile-slide');
+let targetLoopIndex = activeMobileIndex + 1 + 1;
+
+if (targetLoopIndex >= slides.length) {
+targetLoopIndex = slides.length - 1;
+}
+
+const targetSlide = slides[targetLoopIndex];
+if (targetSlide) {
+// Calculate the scroll position manually instead of using scrollIntoView
+const scrollAmount = targetSlide.offsetLeft - wrapper.offsetLeft;
+
+// Use smooth scrolling behavior
+wrapper.style.scrollBehavior = 'smooth';
+wrapper.scrollLeft = scrollAmount;
+
+// Reset scroll behavior after animation
+setTimeout(() => {
+  wrapper.style.scrollBehavior = 'auto';
+}, 500);
+}
+}
+
+/* -----------------------------------------------------
+   4) INIT SCRIPT
+   ----------------------------------------------------- */
+(function() {
+  const isMobile = window.matchMedia('(max-width: 900px)').matches;
+  
+  if (isMobile) {
+    // MOBILE infinite loop with vertical progress & timed auto-advance
+    document.getElementById('mobile-container').style.display = 'block';
+    initializeMobileInfiniteLoop();
+  } else {
+    // DESKTOP
+    initializeDesktop();
+    updateActiveStatesDesktop();
+    animationFrame = requestAnimationFrame(animateDesktop);
+  }
+
+  window.addEventListener('unload', () => {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+    if (mobileAnimationFrame) {
+      cancelAnimationFrame(mobileAnimationFrame);
+    }
+  });
+})();
+// You might also want to prevent any default scroll behavior
+// Add this event listener to your initialization code:
+document.addEventListener('scroll', (e) => {
+if (window.matchMedia('(max-width: 900px)').matches) {
+const wrapper = document.getElementById('mobile-slides-wrapper');
+if (wrapper && wrapper.contains(e.target)) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+}
+}, { passive: false });
+
+</script>
+</body>
+</html>

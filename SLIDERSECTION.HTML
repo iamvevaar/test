@@ -1,0 +1,231 @@
+<style>
+    .slider {
+        overflow: hidden;
+    }
+
+    .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 2s ease-in-out;
+    }
+
+    .top-left-icon {
+        position: absolute;
+        top: -16px;
+        /* Adjust to move the icon down */
+        left: -16px;
+        /* Adjust to move the icon right */
+        width: 36px;
+        /* Resize as needed */
+        height: auto;
+        /* Keep ratio or set a fixed height */
+        display: none;
+        /* Hidden by default */
+        z-index: 10;
+        /* Ensure it appears on top if needed */
+    }
+
+    /* When the card is active, show the icon */
+    .card.active .top-left-icon {
+        display: block;
+    }
+
+    /* This is the “bottom” image that remains in place */
+    .slide.second {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        /* Put it behind the first slide */
+        z-index: 1;
+        /* No transforms here, no translations needed */
+        transform: none;
+    }
+
+    /* This is the “top” image that will be revealed from right to left */
+    .slide.first {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        /* Put it on top of the second slide */
+        z-index: 2;
+        /* Initially clip it so it’s not visible */
+        clip-path: inset(0 100% 0 0);
+        -webkit-clip-path: inset(0 100% 0 0);
+        /* No transforms here, no translations needed */
+        transform: none;
+    }
+
+    @keyframes revealPauseThenReverseNoPause {
+
+        /* 1) 0%→25%: Reveal from 100% clipped to 50% clipped */
+        0% {
+            clip-path: inset(0 100% 0 0);
+            /* fully hidden */
+        }
+
+        25% {
+            clip-path: inset(0 50% 0 0);
+            /* half revealed */
+        }
+
+        /* 2) 25%→45%: Pause at 50% clipped */
+        45% {
+            clip-path: inset(0 50% 0 0);
+            /* no change, so it stays half revealed */
+        }
+
+        /* 3) 45%→70%: Continue revealing from 50%→0% clipped, 
+   same time slice (25%) as the first reveal so speed is consistent */
+        70% {
+            clip-path: inset(0 0 0 0);
+            /* fully revealed */
+        }
+
+        /* 4) 70%→100%: Immediately reverse from fully revealed (0%) to fully hidden (100%) with no pause */
+        100% {
+            clip-path: inset(0 100% 0 0);
+            /* back to fully hidden */
+        }
+    }
+
+    .slider.active .slide.first {
+        animation: revealPauseThenReverseNoPause 12s linear infinite;
+
+        -webkit-animation: revealPauseThenReverseNoPause 12s linear infinite;
+    }
+
+
+    .cards-container {
+        display: flex;
+        gap: 20px;
+        max-width: 800px;
+    }
+
+    .card {
+        flex: 1;
+        background-color: #77A6A1;
+        opacity: 0.5;
+        transition: opacity 0.5s ease;
+    }
+
+    .card.active {
+        opacity: 1;
+        background-image: url("https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/67764567c15e4a9194508f33_Frame%201116602452.svg");
+        color: white;
+        background-size: cover;
+    }
+
+    .card-content h3,
+    .card-content p {
+        color: white;
+        transition: color 0.5s ease;
+    }
+
+    .card.active .card-content {
+        color: #fff;
+        /* White text when the card is active */
+    }
+
+
+
+
+
+
+    .progress-bar {
+        display: none;
+        /* Hidden by default */
+        width: 100%;
+        height: 4px;
+        background: #eee;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .progress {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(314deg, #FFA75A 0%, #F3FD87 100%);
+        transition: width 0.1s linear;
+    }
+
+    .card.active .progress {
+        animation: progress 12s linear;
+    }
+
+    .card.active .progress-bar {
+        display: block;
+        /* Add any desired transitions or animations here */
+    }
+
+    @keyframes progress {
+        0% {
+            width: 0%;
+        }
+
+        100% {
+            width: 100%;
+        }
+    }
+</style>
+
+
+
+
+<script>
+    const slider = document.querySelector('.slider');
+    const slideFirst = document.querySelector('.slide.first');
+    const slideSecond = document.querySelector('.slide.second');
+    const cards = document.querySelectorAll('.card');
+
+    // Array of [image1, image2] for each of the 3 cards
+    const cardImages = [
+        ['https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6777dcd33a46d4c6c75557ce_beautiful%20-%20before.png', 'https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6777dcd4af870579f3f6d6b3_beautiful%20-%20after.png'],
+        ['https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6784e47a758aa2881c5076c0_crowded.jpg' , 'https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6784e7210146afa43d3b6718_walkable.jpg'],
+        ['https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6777e0fd9fa527b3e1fc38a9_affordable%20-%20before.png', 'https://cdn.prod.website-files.com/6756bb3e949af403483e7f74/6777e101ea33e25e7009e69d_affordable%20-%20after.png']
+    ];
+
+  
+        let currentIndex = 0;
+
+        function rotateCards() {
+            // 1) Remove 'active' class from slider and all cards to reset
+            slider.classList.remove('active');
+            cards.forEach(card => card.classList.remove('active'));
+
+            // 2) Force reflow to reset animations
+            void slider.offsetWidth;
+            cards.forEach(card => void card.offsetWidth);
+
+            // 3) Update background images
+            // second image (behind)
+            slideSecond.style.backgroundImage = `url(${cardImages[currentIndex][1]})`;
+            // first image (on top), which will be clipped
+            slideFirst.style.backgroundImage = `url(${cardImages[currentIndex][0]})`;
+
+            // 4) Activate slider and card
+            slider.classList.add('active');
+            cards[currentIndex].classList.add('active');
+
+            // 5) Increment index
+            currentIndex = (currentIndex + 1) % cards.length;
+
+            console.log("currentIndex:", currentIndex);
+            console.log("cardImages[currentIndex]:", cardImages[currentIndex]);
+            console.log("cardImages length:", cardImages.length);
+
+
+        }
+
+        // Initial display
+        rotateCards();
+
+        // Rotate every 6 seconds
+        setInterval(rotateCards, 12000);
+    </script>
